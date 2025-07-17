@@ -1,0 +1,3 @@
+{
+  "procfile" :  "index.docker.io/paketobuildpacks/procfile"
+}

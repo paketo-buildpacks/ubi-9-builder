@@ -1,0 +1,15 @@
+description = "ubi 9 builder with no buildpacks included. To use, specify buildpacks at build time."
+
+[lifecycle]
+version = "0.20.11"
+
+[run]
+[[run.images]]
+image = "index.docker.io/paketobuildpacks/run-ubi9-base:latest"
+
+[build]
+image = "docker.io/paketobuildpacks/build-ubi9-base:0.0.2"
+
+[[targets]]
+arch = "amd64"
+os = "linux"
