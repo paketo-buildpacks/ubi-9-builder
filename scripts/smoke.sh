@@ -124,7 +124,7 @@ function builder::create() {
   name="${1}"
 
   util::print::title "Creating builder..."
-  pack builder create "${name}" --config "${BUILDERDIR}/builder.toml"
+  pack builder create "${name}" --config "${BUILDERDIR}/builder-buildpackless.toml"
 }
 
 function image::pull::lifecycle() {
