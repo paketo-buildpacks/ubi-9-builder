@@ -17,7 +17,7 @@ jobs:
         echo "tag=$(jq -r '.release.tag_name' "${GITHUB_EVENT_PATH}" | sed s/^v//)" >> "$GITHUB_OUTPUT"
 
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Get pack version
       id: pack-version
@@ -36,20 +36,27 @@ jobs:
           pack config experimental true
         fi
 
-    - name: Create Builder Image and Push To Dockerhub
+    - name: Create Builder Image
+      run: |
+        pack builder create builder --config builder.toml
+
+    - name: Push To Dockerhub
       env:
         PAKETO_BUILDPACKS_DOCKERHUB_USERNAME: ${{ secrets.PAKETO_BUILDPACKS_DOCKERHUB_USERNAME }}
         PAKETO_BUILDPACKS_DOCKERHUB_PASSWORD: ${{ secrets.PAKETO_BUILDPACKS_DOCKERHUB_PASSWORD }}
         GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
       run: |
         DOCKERHUB_ORG="${GITHUB_REPOSITORY_OWNER/-/}" # translates 'paketo-buildpacks' to 'paketobuildpacks'
-        registry_repo=ubi-9-buildpackless-builder
+        # Strip off the Github org prefix from repo name
+        # paketo-buildpacks/builder-with-some-name --> builder-with-some-name
+        registry_repo=$(echo "${{ github.repository }}" | sed 's/^.*\///')
 
         echo "${PAKETO_BUILDPACKS_DOCKERHUB_PASSWORD}" | docker login --username "${PAKETO_BUILDPACKS_DOCKERHUB_USERNAME}" --password-stdin
-        # In order to publish multi-arch builders with pack, the builder MUST be published.
-        # It cannot be created locally and then pushed
-        pack builder create "${DOCKERHUB_ORG}/${registry_repo}:${{ steps.event.outputs.tag }}" --config builder-buildpackless.toml --publish
-        pack builder create "${DOCKERHUB_ORG}/${registry_repo}:latest" --config builder-buildpackless.toml --publish
+        docker tag builder "${DOCKERHUB_ORG}/${registry_repo}:latest"
+        docker tag builder "${DOCKERHUB_ORG}/${registry_repo}:${{ steps.event.outputs.tag }}"
+
+        docker push "${DOCKERHUB_ORG}/${registry_repo}:latest"
+        docker push "${DOCKERHUB_ORG}/${registry_repo}:${{ steps.event.outputs.tag }}"
 
   failure:
     name: Alert on Failure
