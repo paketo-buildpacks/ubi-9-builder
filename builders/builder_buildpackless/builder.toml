@@ -14,3 +14,19 @@ description = "ubi 9 builder with no buildpacks included. To use, specify buildp
 [[targets]]
   arch = "amd64"
   os = "linux"
+
+[[targets]]
+  arch = "arm64"
+  os = "linux"
+
+[[targets]]
+  arch = "ppc64le"
+  os = "linux"
+
+[[targets]]
+  arch = "ppc64le"
+  os = "linux"
+
+[[targets]]
+  arch = "s390x"
+  os = "linux"

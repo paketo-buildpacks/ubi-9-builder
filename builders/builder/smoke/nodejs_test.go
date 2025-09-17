@@ -13,7 +13,7 @@ import (
 	. "github.com/paketo-buildpacks/occam/matchers"
 )
 
-func testProcfile(t *testing.T, context spec.G, it spec.S) {
+func testNodejs(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect     = NewWithT(t).Expect
 		Eventually = NewWithT(t).Eventually
@@ -27,7 +27,7 @@ func testProcfile(t *testing.T, context spec.G, it spec.S) {
 		docker = occam.NewDocker()
 	})
 
-	context("procfile buildpack specified at build time", func() {
+	context("detects a Nodejs app", func() {
 		var (
 			image     occam.Image
 			container occam.Container
@@ -40,9 +40,6 @@ func testProcfile(t *testing.T, context spec.G, it spec.S) {
 			var err error
 			name, err = occam.RandomName()
 			Expect(err).NotTo(HaveOccurred())
-
-			source, err = occam.Source(filepath.Join("testdata", "procfile"))
-			Expect(err).NotTo(HaveOccurred())
 		})
 
 		it.After(func() {
@@ -52,15 +49,16 @@ func testProcfile(t *testing.T, context spec.G, it spec.S) {
 			Expect(os.RemoveAll(source)).To(Succeed())
 		})
 
-		it("builds Procfile app successfully", func() {
+		it("builds successfully", func() {
 			var err error
+			source, err = occam.Source(filepath.Join("testdata", "nodejs"))
+			Expect(err).NotTo(HaveOccurred())
+
 			var logs fmt.Stringer
 			image, logs, err = pack.Build.
-				WithPullPolicy("never").
+				WithNetwork("host").
+				WithPullPolicy("always").
 				WithBuilder(Builder).
-				WithBuildpacks(
-					config.Procfile,
-				).
 				Execute(name, source)
 			Expect(err).ToNot(HaveOccurred(), logs.String)
 
@@ -72,7 +70,12 @@ func testProcfile(t *testing.T, context spec.G, it spec.S) {
 
 			Eventually(container).Should(BeAvailable())
 
-			Expect(logs).To(ContainLines(ContainSubstring("Paketo Buildpack for Procfile")))
+			Expect(logs).To(ContainLines(ContainSubstring("Paketo Buildpack for Node Engine")))
+			Expect(logs).To(ContainLines(ContainSubstring("Paketo Buildpack for NPM Install")))
+			Expect(logs).To(ContainLines(ContainSubstring("Paketo Buildpack for NPM Start")))
+			Expect(logs).To(ContainLines(ContainSubstring("[extender (build)] Enabling module streams")))
+			Expect(logs).To(ContainLines(MatchRegexp(`nodejs:\d+`)))
+			Expect(logs).To(ContainLines(ContainSubstring("[extender (build)]   Node no longer requested by plan")))
 		})
 	})
 }
