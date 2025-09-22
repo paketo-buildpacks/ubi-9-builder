@@ -104,7 +104,7 @@ function main() {
   if [[ "${pushBuilderToLocalRegistry}" == "true" ]]; then
     registryPort=$(get::random::port)
     registryPid=$(local::registry::start $registryPort)
-    trap 'kill $registryPid' EXIT
+    # trap 'kill $registryPid' EXIT
     localRegistryUrl="127.0.0.1:$registryPort"
     util::print::info "Started local registry at ${localRegistryUrl} with PID ${registryPid}"
   fi
@@ -163,11 +163,11 @@ function tools::install() {
   token="${1}"
 
   util::tools::crane::install \
-    --directory "${PROGDIR}/.bin" \
+    --directory "${ROOTDIR}/.bin" \
     --token "${token}"
 
   util::tools::pack::install \
-    --directory "${PROGDIR}/.bin" \
+    --directory "${ROOTDIR}/.bin" \
     --token "${token}"
 }
 

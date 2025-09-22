@@ -15,12 +15,10 @@ jobs:
     outputs:
       builders: ${{ steps.get-builders.outputs.builders }}
       tag: ${{ steps.event.outputs.tag }}
-      pack_version: ${{ steps.pack-version.outputs.version }}
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
-      # TODO: Add the image re on the buiders.json default
     - name: Get Builders
       id: get-builders
       run: |
@@ -34,7 +32,7 @@ jobs:
           registry_repo=$(echo "${{ github.repository }}" | sed 's/^.*\///')
           builders=$(jq -n -c '[
               {
-                "name": "default",
+                "name": "'"${registry_repo}"'",
                 "path": ".",
                 "container_repository": "'"${registry_repo}"'"
               }
@@ -67,7 +65,7 @@ jobs:
     steps:
 
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Create Builder Image and Push To Dockerhub
       env:

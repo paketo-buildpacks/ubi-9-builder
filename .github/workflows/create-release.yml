@@ -33,7 +33,7 @@ jobs:
           registry_repo=$(echo "${{ github.repository }}" | sed 's/^.*\///')
           builders=$(jq -n -c '[
               {
-                "name": "default",
+                "name": "'"${registry_repo}"'",
                 "path": ".",
                 "container_repository": "'"${registry_repo}"'"
               }
@@ -99,10 +99,10 @@ jobs:
       release_notes: ${{ steps.notes.outputs.body }}
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Setup Go
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v6
       with:
         go-version-file: go.mod
 
@@ -121,7 +121,7 @@ jobs:
       run: |
         ./scripts/smoke.sh --builder-dir "${{ matrix.builders.path }}"
 
-    - name: Generate builder information
+    - name: Generate builder info
       id: notes
       run: |
         registry_builder_name=localhost:5000/${{ matrix.builders.name }}
@@ -133,13 +133,13 @@ jobs:
           | grep -v 'REMOTE:' \
           | grep -v 'LOCAL:' \
           | grep -v '\(not present\)' \
-          | grep -v 'Warning' > "${{ matrix.builders.name }}-information.md"
+          | grep -v 'Warning' > "${{ matrix.builders.name }}-info.md"
 
-    - name: Upload information for ${{ matrix.builders.name }}
+    - name: Upload info for ${{ matrix.builders.name }}
       uses: actions/upload-artifact@v4
       with:
-        name: "${{ matrix.builders.name }}-information.md"
-        path: "${{ matrix.builders.name }}-information.md"
+        name: "${{ matrix.builders.name }}-info.md"
+        path: "${{ matrix.builders.name }}-info.md"
 
   release:
     name: Release
@@ -147,15 +147,15 @@ jobs:
     needs: [smoke, preparation]
     steps:
     - name: Checkout With History
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         fetch-depth: 0  # gets full history
 
     - name: Download Release Note File(s)
       uses: actions/download-artifact@v4
       with:
-        path: information
-        pattern: "*information.md"
+        path: info
+        pattern: "*info.md"
         merge-multiple: true
 
     - name: Generate Release Notes and Assets
@@ -165,40 +165,51 @@ jobs:
         shopt -s inherit_errexit
 
         builders=$(echo '${{ needs.preparation.outputs.builders }}' | jq -c '.[]')
-        release_notes_dir="information"
+        builders_length=$(echo '${{ needs.preparation.outputs.builders }}' | jq 'length')
+
+        release_notes_dir="info"
 
         # Start with an empty array
         assets=$(jq -n -c '[]')
 
-        # Generate release assets
-        for builder in $builders; do
-          builder_name=$(echo "$builder" | jq -r '.name')
+        # Generate release assets only if we have more than one builder
+        if [ "$builders_length" -gt 1 ]; then
+          for builder in $builders; do
+            builder_name=$(echo "$builder" | jq -r '.name')
 
-          assets="$(jq -c \
-            --arg release_notes_dir "${release_notes_dir}" \
-            --arg builder_name "${builder_name}" \
-            '. += [
-              {
-                "path": ($release_notes_dir + "/" + $builder_name + "-" + "information.md"),
-                "name": ($builder_name + "-" + "information.md"),
-                "content_type": "text/markdown"
-              }
-            ]' <<<"${assets}")"
-        done
+            assets="$(jq -c \
+              --arg release_notes_dir "${release_notes_dir}" \
+              --arg builder_name "${builder_name}" \
+              '. += [
+                {
+                  "path": ($release_notes_dir + "/" + $builder_name + "-" + "info.md"),
+                  "name": ($builder_name + "-" + "info.md"),
+                  "content_type": "text/markdown"
+                }
+              ]' <<<"${assets}")"
+          done
+        fi
 
         echo "assets=${assets}" >> "$GITHUB_OUTPUT"
 
         # translates 'paketo-buildpacks' to 'paketobuildpacks'
         DOCKERHUB_ORG="${GITHUB_REPOSITORY_OWNER/-/}"
 
-        # Generate release notes
         release_body=""
-        for builder in $builders; do
-          container_repository=$(echo "$builder" | jq -r '.container_repository')
-          release_body+="Builder: \`${DOCKERHUB_ORG}/${container_repository}\`\n"
-        done
+        if [ "$builders_length" -gt 1 ]; then
+          for builder in $builders; do
+            container_repository=$(echo "$builder" | jq -r '.container_repository')
+            release_body+="Builder: \`${DOCKERHUB_ORG}/${container_repository}\`\n"
+          done
+          payload="{\"body\" : \"\n${release_body}\"}"
+        else
+          builder=$(echo "$builders" | head -n 1)
+          release_body="$(cat $release_notes_dir/$(echo "$builder" | jq -r '.name')-info.md \
+          | sed -e '/./,$!d' \
+          | awk -F, '{printf "%s\\n", $0}')"
+          payload="{\"body\" : \"\`\`\`\n${release_body}\n\`\`\`\"}"
+        fi
 
-        payload="{\"body\" : \"\n${release_body}\"}"
         echo "release_body=${payload}" >> "$GITHUB_OUTPUT"
 
     - name: Publish Release

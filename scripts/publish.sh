@@ -89,7 +89,7 @@ function tools::install() {
   token="${1}"
 
   util::tools::pack::install \
-    --directory "${PROGDIR}/.bin" \
+    --directory "${ROOT_DIR}/.bin" \
     --token "${token}"
 }
 
