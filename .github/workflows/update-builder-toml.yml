@@ -33,7 +33,7 @@ jobs:
           registry_repo=$(echo "${{ github.repository }}" | sed 's/^.*\///')
           builders=$(jq -n -c '[
               {
-                "name": "default",
+                "name": "'"${registry_repo}"'",
                 "path": ".",
                 "container_repository": "'"${registry_repo}"'"
               }
@@ -61,7 +61,7 @@ jobs:
 
     steps:
     - name: Check out
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Checkout branch
       uses: paketo-buildpacks/github-config/actions/pull-request/checkout-branch@main
