@@ -3,12 +3,14 @@
         {
             "name": "ubi-9-builder",
             "path": "builders/builder",
-            "container_repository": "ubi-9-builder"
+            "container_repository": "ubi-9-builder",
+            "test_runners": ["ubuntu-22.04"]
         },
         {
             "name": "ubi-9-builder-buildpackless",
             "path": "builders/builder_buildpackless",
-            "container_repository": "ubi-9-builder-buildpackless"
+            "container_repository": "ubi-9-builder-buildpackless",
+            "test_runners": ["ubuntu-22.04"]
         }
     ]
 }
