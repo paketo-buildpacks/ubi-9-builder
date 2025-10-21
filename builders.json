@@ -1,16 +1,32 @@
 {
-    "builders": [
+  "builders": [
+    {
+      "name": "ubi-9-builder",
+      "path": "builders/builder",
+      "container_repository": "ubi-9-builder",
+      "test_runners": ["ubuntu-22.04"],
+      "test_data": [
         {
-            "name": "ubi-9-builder",
-            "path": "builders/builder",
-            "container_repository": "ubi-9-builder",
-            "test_runners": ["ubuntu-22.04"]
+          "sample_dir": "nodejs/npm",
+          "test_dir": "builders/builder/smoke/testdata/nodejs/npm"
         },
         {
-            "name": "ubi-9-builder-buildpackless",
-            "path": "builders/builder_buildpackless",
-            "container_repository": "ubi-9-builder-buildpackless",
-            "test_runners": ["ubuntu-22.04"]
+          "sample_dir": "procfile/procfile-sample",
+          "test_dir": "builders/builder/smoke/testdata/procfile"
         }
-    ]
+      ]
+    },
+    {
+      "name": "ubi-9-builder-buildpackless",
+      "path": "builders/builder_buildpackless",
+      "container_repository": "ubi-9-builder-buildpackless",
+      "test_runners": ["ubuntu-22.04"],
+      "test_data": [
+        {
+          "sample_dir": "procfile/procfile-sample",
+          "test_dir": "builders/builder_buildpackless/smoke/testdata/procfile"
+        }
+      ]
+    }
+  ]
 }
