@@ -12,8 +12,8 @@ description = "Ubi 9 builder with buildpacks for Node.js, Java, Quarkus and Proc
   version = "0.7.0"
 
 [[buildpacks]]
-  uri = "docker://docker.io/paketobuildpacks/java:20.4.0"
-  version = "20.4.0"
+  uri = "docker://docker.io/paketobuildpacks/java:20.5.0"
+  version = "20.5.0"
 
 [[buildpacks]]
   uri = "docker://docker.io/paketobuildpacks/nodejs:9.15.3"
@@ -49,7 +49,7 @@ description = "Ubi 9 builder with buildpacks for Node.js, Java, Quarkus and Proc
 
   [[order.group]]
     id = "paketo-buildpacks/java"
-    version = "20.4.0"
+    version = "20.5.0"
 
 [[order]]
 
