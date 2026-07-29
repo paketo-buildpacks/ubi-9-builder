@@ -30,8 +30,8 @@ description = "Ubi 9 builder with buildpacks for Node.js, Java, Quarkus and Proc
 
 [[extensions]]
   id = "paketo-buildpacks/ubi-nodejs-extension"
-  uri = "docker://docker.io/paketobuildpacks/ubi-nodejs-extension:1.6.32"
-  version = "1.6.32"
+  uri = "docker://docker.io/paketobuildpacks/ubi-nodejs-extension:1.6.33"
+  version = "1.6.33"
 
 [lifecycle]
   version = "0.21.14"
@@ -71,7 +71,7 @@ description = "Ubi 9 builder with buildpacks for Node.js, Java, Quarkus and Proc
 
   [[order-extensions.group]]
     id = "paketo-buildpacks/ubi-nodejs-extension"
-    version = "1.6.32"
+    version = "1.6.33"
 
 [run]
 
