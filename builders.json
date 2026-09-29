@@ -23,6 +23,10 @@
       "test_runners": ["ubuntu-22.04"],
       "test_data": [
         {
+          "sample_dir": "nodejs/npm",
+          "test_dir": "builders/builder_buildpackless/smoke/testdata/nodejs/npm"
+        },
+        {
           "sample_dir": "procfile/procfile-sample",
           "test_dir": "builders/builder_buildpackless/smoke/testdata/procfile"
         }
