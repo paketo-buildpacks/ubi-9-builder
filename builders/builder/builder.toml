@@ -34,7 +34,7 @@ description = "Ubi 9 builder with buildpacks for Node.js, Java, Quarkus and Proc
   version = "1.6.43"
 
 [lifecycle]
-  version = "0.21.23"
+  version = "0.21.14"
 
 [[order]]
 
